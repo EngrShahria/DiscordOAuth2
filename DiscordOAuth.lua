@@ -57,4 +57,22 @@ function OAuth:GetAccessTokens(code, callback)
     end)
 end
 
+function OAuth:GetUserInfo(callback)
+    if self.AccessToken == nil then
+       return callback({error = true, reason = "No Access Token found in the cache."})
+    end
+    local Authorization = self.authMethod .. " " ..self.AccessToken  
+
+    local reqURL = self.BaseURL .. "/users/@me"
+    
+    local read, res, any =  http.request("GET", reqURL, {{"Authorization",  Authorization}})
+    local Body = json.decode(res)
+
+    if Body.code == 0 then 
+        return callback({error = true, reason = "Invalid Access Token, unable to get data"})
+    end
+    return callback(Body)  
+end
+
+
 return OAuth
